@@ -34,6 +34,8 @@ class EReputationBase:
             req = ERApi(method="post", entity=entity)
             req.set_body(data)
             res = req.execute()
+        
+        return res
 
     def extract_id(self, foreign_key: str) -> str:
         return foreign_key.split('/')[2]

@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 
 
-class Expedia(Scraping):
+class Trustpilot(Scraping):
     def __init__(self, url: str):
         super().__init__(in_background=False, url=url)
 
@@ -29,23 +29,24 @@ class Expedia(Scraping):
 
         reviews = []
 
-        review_cards = soupe.find_all('article', {'itemprop': 'review'})
+        review_cards = soupe.find_all('article', {'data-service-review-card-paper': "true"})
         for card in review_cards:
             reviews.append({
                 'comment': """%s: %s""" % (
-                    card.find('span', {'itemprop': 'name'}).text.strip() if card.find('span', {'itemprop': 'name'}) else "", 
-                    card.find('span', {'itemprop': 'description'}).text.strip() if card.find('span', {'itemprop': 'description'}) else ""),
-                'rating': card.find('span', {'itemprop': 'ratingValue'}).text.strip().split('/')[0] \
-                            if card.find('span', {'itemprop': 'ratingValue'}) else "",
+                    card.find('a', {'data-review-title-typography': 'true'}).text.strip() if card.find('a', {'data-review-title-typography': 'true'}) else "", 
+                    card.find('p', {'data-service-review-text-typography': 'true'}).text.strip() if card.find('p', {'data-service-review-text-typography': 'true'}) else ""),
+                'rating': card.find('div', {'data-service-review-rating': True})['data-service-review-rating'],
                 'language': 'fr',
                 'source': urlparse(self.url).netloc.split('.')[1],
-                'author': card.find('h4').text.strip(),
+                'author': card.find('span', {'data-consumer-name-typography': 'true'}).text.strip(),
                 'establishment': '/api/establishments/2'
             })
+        print(len(review_cards))
+        print(len(reviews))
 
         self.data = reviews
 
 
-# trp = Expedia(url="https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews")
+# trp = Trustpilot(url="https://fr.trustpilot.com/review/liberkeys.com")
 # trp.execute()
-# print(trp.data)
+# # print(trp.data)
