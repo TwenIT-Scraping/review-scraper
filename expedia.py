@@ -15,6 +15,7 @@ import time
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
+from langdetect import detect
 
 
 class Expedia(Scraping):
@@ -31,13 +32,20 @@ class Expedia(Scraping):
 
         review_cards = soupe.find_all('article', {'itemprop': 'review'})
         for card in review_cards:
+            title = card.find('span', {'itemprop': 'name'}).text.strip() if card.find('span', {'itemprop': 'name'}) else ""
+            detail = card.find('span', {'itemprop': 'description'}).text.strip() if card.find('span', {'itemprop': 'description'}) else ""
+            comment = f"{title}{': ' if title and detail else ''}{detail}"
+
+            try:
+                lang = detect(comment)
+            except: 
+                lang = 'en'
+
             reviews.append({
-                'comment': """%s: %s""" % (
-                    card.find('span', {'itemprop': 'name'}).text.strip() if card.find('span', {'itemprop': 'name'}) else "", 
-                    card.find('span', {'itemprop': 'description'}).text.strip() if card.find('span', {'itemprop': 'description'}) else ""),
+                'comment': comment,
                 'rating': card.find('span', {'itemprop': 'ratingValue'}).text.strip().split('/')[0] \
                             if card.find('span', {'itemprop': 'ratingValue'}) else "",
-                'language': 'fr',
+                'language': lang,
                 'source': urlparse(self.url).netloc.split('.')[1],
                 'author': card.find('h4').text.strip(),
                 'establishment': '/api/establishments/2'
@@ -46,6 +54,6 @@ class Expedia(Scraping):
         self.data = reviews
 
 
-# trp = Expedia(url="https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews")
-# trp.execute()
+trp = Expedia(url="https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews")
+trp.execute()
 # print(trp.data)

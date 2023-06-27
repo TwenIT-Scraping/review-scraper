@@ -41,11 +41,9 @@ class Campings(Scraping):
                 'language': 'fr',
                 'source': urlparse(self.url).netloc.split('.')[1],
                 'author': card.find('div', {'class': 'review__author'}).text.strip() if card.find('div', {'class': 'review__author'}) else "",
-                'establishment': '/api/establishments/2'
+                'establishment': '/api/establishments/3'
             }
             t['author'] and reviews.append(t)
-        print(len(review_cards))
-        print(len(reviews))
 
         self.data = reviews
 

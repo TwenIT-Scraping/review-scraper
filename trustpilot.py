@@ -15,6 +15,7 @@ import time
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
+from langdetect import detect
 
 
 class Trustpilot(Scraping):
@@ -31,22 +32,27 @@ class Trustpilot(Scraping):
 
         review_cards = soupe.find_all('article', {'data-service-review-card-paper': "true"})
         for card in review_cards:
+            title = card.find('a', {'data-review-title-typography': 'true'}).text.strip() if card.find('a', {'data-review-title-typography': 'true'}) else ""
+            detail = card.find('p', {'data-service-review-text-typography': 'true'}).text.strip() if card.find('p', {'data-service-review-text-typography': 'true'}) else ""
+            comment = f"{title}{': ' if title and detail else ''}{detail}"
+
+            try:
+                lang = detect(comment)
+            except: 
+                lang = 'en'
+
             reviews.append({
-                'comment': """%s: %s""" % (
-                    card.find('a', {'data-review-title-typography': 'true'}).text.strip() if card.find('a', {'data-review-title-typography': 'true'}) else "", 
-                    card.find('p', {'data-service-review-text-typography': 'true'}).text.strip() if card.find('p', {'data-service-review-text-typography': 'true'}) else ""),
-                'rating': card.find('div', {'data-service-review-rating': True})['data-service-review-rating'],
-                'language': 'fr',
+                'comment': comment,
+                'rating': card.find('div', {'data-service-review-rating': True})['data-service-review-rating'] if card.find('div', {'data-service-review-rating': True}) else "0",
+                'language': lang,
                 'source': urlparse(self.url).netloc.split('.')[1],
-                'author': card.find('span', {'data-consumer-name-typography': 'true'}).text.strip(),
-                'establishment': '/api/establishments/2'
+                'author': card.find('span', {'data-consumer-name-typography': 'true'}).text.strip() if card.find('span', {'data-consumer-name-typography': 'true'}) else "",
+                'establishment': '/api/establishments/4'
             })
-        print(len(review_cards))
-        print(len(reviews))
 
         self.data = reviews
 
 
-# trp = Trustpilot(url="https://fr.trustpilot.com/review/liberkeys.com")
-# trp.execute()
-# # print(trp.data)
+trp = Trustpilot(url="https://fr.trustpilot.com/review/liberkeys.com")
+trp.execute()
+# print(trp.data)
