@@ -36,36 +36,48 @@ class Booking(Scraping):
         except Exception as e:
             print(e)
 
-        page = self.driver.page_source
+        while True:
 
-        soupe = BeautifulSoup(page, 'lxml')
+            page = self.driver.page_source
 
-        # review_c = soupe.find('div', {'id': 'review_list_score_container'})
+            soupe = BeautifulSoup(page, 'lxml')
 
-        review_cards = soupe.find_all('div', {'itemprop': 'review'})
-        for card in review_cards:
-            title = card.find('h3', {'class': 'c-review-block__title'}).text.strip() if card.find('h3', {'class': 'c-review-block__title'}) else ""
-            detail = card.find('span', {'class': 'c-review__body'}).text.strip().replace('\n', ' ') if card.find('span', {'class': 'c-review__body'}) else ""
-            comment = f"{title}{': ' if title and detail else ''}{detail}"
+            review_cards = soupe.find_all('div', {'itemprop': 'review'})
+
+            for card in review_cards:
+                title = card.find('h3', {'class': 'c-review-block__title'}).text.strip() if card.find('h3', {'class': 'c-review-block__title'}) else ""
+                detail = card.find('span', {'class': 'c-review__body'}).text.strip().replace('\n', ' ') if card.find('span', {'class': 'c-review__body'}) else ""
+                comment = f"{title}{': ' if title and detail else ''}{detail}"
+
+                try:
+                    lang = detect(comment)
+                except: 
+                    lang = 'en'
+
+                try:
+                    reviews.append({
+                        'comment': comment,
+                        'rating': card.find('div', {'class': 'bui-review-score__badge'}).text.strip() \
+                                    if card.find('div', {'class': 'bui-review-score__badge'}) else "0",
+                        'language': lang,
+                        'source': urlparse(self.url).netloc.split('.')[1],
+                        'author': card.find('span', {'class': 'bui-avatar-block__title'}).text.strip() if card.find('span', {'class': 'bui-avatar-block__title'}) else "",
+                        'establishment': '/api/establishments/2'
+                    })
+                except Exception as e:
+                    print(e)
+                    continue
 
             try:
-                lang = detect(comment)
-            except: 
-                lang = 'en'
 
-            try:
-                reviews.append({
-                    'comment': comment,
-                    'rating': card.find('div', {'class': 'bui-review-score__badge'}).text.strip() \
-                                if card.find('div', {'class': 'bui-review-score__badge'}) else "0",
-                    'language': lang,
-                    'source': urlparse(self.url).netloc.split('.')[1],
-                    'author': card.find('span', {'class': 'bui-avatar-block__title'}).text.strip() if card.find('span', {'class': 'bui-avatar-block__title'}) else "",
-                    'establishment': '/api/establishments/2'
-                })
+                next_btn = self.driver.find_element(By.CLASS_NAME, 'pagenext')
+
+                if next_btn:
+                    self.driver.execute_script("arguments[0].click();", next_btn)
+                    time.sleep(4)
+                
             except Exception as e:
-                print(e)
-                continue
+                break
 
         self.data = reviews
 
