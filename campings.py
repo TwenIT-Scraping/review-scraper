@@ -27,23 +27,40 @@ class Campings(Scraping):
         self.driver.execute_script("arguments[0].click();", review_toggle_btn)
         time.sleep(.5)
 
-        page = self.driver.page_source
-
-        soupe = BeautifulSoup(page, 'lxml')
-
         reviews = []
 
-        review_cards = soupe.find('div', {'class': 'reviews__list'}).find_all('div', {'data-toggle': True})
-        for card in review_cards:
-            t = {
-                'comment': card.find('div', {'class': 'review__comment'}).text.strip() if card.find('div', {'class': 'review__comment'}) else "",
-                'rating': card.find('span', {'class': 'review__rating'}).text.strip().split('/')[0] if card.find('span', {'class': 'review__rating'}) else "0",
-                'language': 'fr',
-                'source': urlparse(self.url).netloc.split('.')[1],
-                'author': card.find('div', {'class': 'review__author'}).text.strip() if card.find('div', {'class': 'review__author'}) else "",
-                'establishment': '/api/establishments/3'
-            }
-            t['author'] and reviews.append(t)
+        while True:
+
+            page = self.driver.page_source
+
+            soupe = BeautifulSoup(page, 'lxml')
+
+            review_cards = soupe.find('div', {'class': 'reviews__list'}).find_all('div', {'data-toggle': True})
+
+            for card in review_cards:
+                t = {
+                    'comment': card.find('div', {'class': 'review__comment'}).text.strip() if card.find('div', {'class': 'review__comment'}) else "",
+                    'rating': card.find('span', {'class': 'review__rating'}).text.strip().split('/')[0] if card.find('span', {'class': 'review__rating'}) else "0",
+                    'language': 'fr',
+                    'source': urlparse(self.url).netloc.split('.')[1],
+                    'author': card.find('div', {'class': 'review__author'}).text.strip() if card.find('div', {'class': 'review__author'}) else "",
+                    'establishment': '/api/establishments/3'
+                }
+                
+                t['author'] and reviews.append(t)
+
+            try:
+                next_btn = self.driver.find_element(By.CLASS_NAME, 'dca-pagination__next')
+                hidden_btn = 'dca-pagination--hidden' in next_btn.get_attribute('class').split()
+
+                if next_btn and not hidden_btn:
+                    self.driver.execute_script("arguments[0].click();", next_btn)
+                    time.sleep(4)
+                else:
+                    break
+                
+            except Exception as e:
+                break
 
         self.data = reviews
 
