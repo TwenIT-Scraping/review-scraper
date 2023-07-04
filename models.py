@@ -31,7 +31,7 @@ class EReputationBase:
         else:
             data.pop('id')
             entity = data.pop('entity')
-            req = ERApi(method="post", entity=entity)
+            req = ERApi(method="post", entity=self.entity)
             req.set_body(data)
             res = req.execute()
         
@@ -119,6 +119,15 @@ class Review(EReputationBase):
     def refresh(self, review) -> None:
         for key in review.keys():
             setattr(self, key, review[key])
+
+    @staticmethod
+    def save_multi(data_content):
+        print(" ==== save multi ====")
+        print(data_content)
+        req = ERApi(method="postmulti", entity=f"reviews/multi")
+        req.set_body({'data_content': data_content})
+        res = req.execute()
+        print(res.text)
 
 # etab = Establishment(rid=2)
 # etab.refresh()
