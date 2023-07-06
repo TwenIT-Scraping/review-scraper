@@ -91,8 +91,6 @@ class Booking(Scraping):
             except Exception as e:
                 break
 
-        print(reviews)
-
         self.data = reviews
 
 
