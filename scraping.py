@@ -51,8 +51,7 @@ class Scraping(object):
         self.counter = 0
 
         self.data = {}
-        self.url = "https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews"
-        # print(url)
+        self.url = url
 
     def permute_driver(self) -> None:
         self.driver.quit()
@@ -101,6 +100,7 @@ class Scraping(object):
             self.extract()
             time.sleep(2)
             self.save()
+            self.driver.quit()
         except Exception as e:
             print(e)
             self.driver.quit()
@@ -116,11 +116,24 @@ class Scraping(object):
         self.driver.quit()
         sys.exit("Arret")
 
-    def save(self) -> None:
-        # print(self.data)
+    def format(self) -> None:
+        result = ""
         for item in self.data:
-            r = Review(item)
-            r.save()
+            result += '$'.join([item['author'], item['source'], item['language'], item['rating'], item['establishment'], item['date_review'], item['comment']]) + "#"
+
+        self.formated_data = result
+
+    def save(self) -> None:
+        
+        self.format()
+        # print(self.formated_data)
+        Review.save_multi(self.formated_data)
+        print(len(self.data), "reviews uploaded!")
+
+        # for item in self.data:
+        #     r = Review(item)
+        #     res = r.save()
+        #     print(res['id'])
 
     @abstractmethod
     def extract(self) -> None:

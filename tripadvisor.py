@@ -15,92 +15,71 @@ import time
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
+from langdetect import detect
 
 
-class TripAdvisor(Scraping):
+class Tripadvisor(Scraping):
     def __init__(self, in_background: bool = False, url: str = None):
         super().__init__(in_background=in_background, url=url)
 
     def extract(self):
+        reviews = []
+
         try:
-            page = self.driver.page_source
+            while True:
+                page = self.driver.page_source
 
-            soupe = BeautifulSoup(page, 'lxml')
+                soupe = BeautifulSoup(page, 'lxml')
 
-            info_container = soupe.find('div', {"data-tab":"TABS_OVERVIEW"}).find_all('div', class_='ui_column')
-            website = info_container[2].find('div', class_='e').find('div', class_='f').find_all('a', href=True)
+                reviews_card = soupe.find_all('div', {'data-test-target':"HR_CC_CARD"})
+                
+                print(len(reviews))
 
-            name = soupe.find('h1', {'data-test-target':'top-info-header'}).text.strip()
-            open_state = re.sub(r'[^\w\s:-]', '', soupe.find('div', {'data-test-target':'restaurant-detail-info'}).find('div', class_='NehmB').text.strip())
-            info_container = soupe.find('div', {"data-tab":"TABS_OVERVIEW"}).find_all('div', class_='ui_column')
-            stars = info_container[0].find('span', class_='ZDEqb').text.strip().replace(',', '.')
-            review_count = int(info_container[0].find('a', class_='IcelI').text.strip().replace('\u202f', '').split(' ')[0])
-            adresse = info_container[2].find_all('span', class_='yEWoV')[0].text.strip()
-            website = info_container[2].find('div', class_='e').find('div', class_='f').find_all('a', href=True)[1]['href']
+                for item in reviews_card:
+                    # try:
+                    #     review['reviewLangage'] = detect(review['reviewsText'])
+                    # except:
+                    #     print("Erreur langue: ", review['reviewsText'])
+                    #     review['reviewLangage'] = 'en'
+                    title = item.find('div', {'data-test-target':'review-title'}).text.strip() if item.find('div', {'data-test-target':'review-title'}) else ''
+                    detail = item.find('span', {'class':'QewHA'}).find('span').text.strip().replace('\n', '') if item.find('span', {'class':'QewHA'}) else ''
+                    comment = f"{title}{': ' if title and detail else ''}{detail}"
+                    
+                    try:
+                        lang = detect(comment)
+                    except:
+                        lang = 'en'
 
-            phone_number = [item.text.strip() for item in info_container[2].find('div', class_='e').find('div', class_='f').find_all('a', href=True) if item['href'].startswith('tel:')][0] or ''
+                    reviews.append({
+                        'comment': comment,
+                        'rating': str(int(item.find('span', class_='ui_bubble_rating')['class'][1].split('_')[1]) / 10) if item.find('span', class_='ui_bubble_rating') else "0",
+                        'language': lang,
+                        'source': urlparse(self.url).netloc.split('.')[1],
+                        'author': item.find('a', class_='ui_header_link').text.strip() if item.find('a', class_='ui_header_link') else "",
+                        'establishment': '/api/establishments/4'
+                    })
 
-            reviews_container = soupe.find('div', {'id':"REVIEWS"}).find_all('div', class_='review-container')
-            url = self.driver.current_url
-            reviews = []
+                self.data = reviews
 
-            for item in reviews_container:
-                review = {}
-                text = item.find('p', class_='partial_entry').text.strip()
-                review['reviewsText'] = text
-                review['reviewsRating'] = str(int(item.find('span', class_='ui_bubble_rating')['class'][1].split('_')[1]) / 10)
                 try:
-                    review['reviewLangage'] = detect(review['reviewsText'])
-                except:
-                    print("Erreur langue: ", review['reviewsText'])
-                    review['reviewLangage'] = 'en'
-                review['source'] = urlparse(url).netloc.split('.')[1]
-                review['reviewsAuthorName'] = item.find('div', class_='info_text').text.strip()
-                review['reviewsTime'] = item.find('span', class_='ratingDate').text.strip()
-                reviews.append(review)
-
-            # images = []
-
-            # self.driver.execute_script("ta.plc_resp_rr_photo_mosaic_0_handlers.openPhotoViewer();")
-            # WebDriverWait(self.driver, 10)
-            # time.sleep(4)
-
-            # subpage = BeautifulSoup(self.driver.page_source, 'lxml')
-            # images_container = subpage.find('div', class_='photoGridBox').find_all('img', src=True)
-
-            # for i in range(len(images_container)):
-            #     image = images_container[i]['src']
-            #     images.append(image)
-            
-            # image_button = check_images()
-            # if image_button:
-            #     self.driver.execute_script("arguments[0].click();", image_button)
-            #     WebDriverWait(self.driver, timeout=3).until(lambda d: d.find_element(By.CLASS_NAME,"photoGridBox"))
-
-            #     subpage = BeautifulSoup(self.driver.page_source, 'lxml')
-            #     images_container = subpage.find('div', class_='photoGridBox').find_all('img')
-
-            #     for i in range(5):
-            #         image = images_container[i]['src']
-            #         images.append(image)
-
-            data = {}
-            data['name'] = name
-            data['rating'] = stars
-            data['reservable'] = ''
-            data['takeout'] = True
-            data['types'] = 'restaurant'
-            data['url'] = url
-            data['addresseComponentLongName'] = adresse
-            data['website'] = website
-            data['internationalPhone'] = phone_number
-            # data['openingHoursOpenNow'] = ''
-            # data['openingHoursPeriods'] = ''
-            data['userRatingsTotal'] = review_count
-            # data['images'] = images
-            data['reviews'] = reviews
-
-            self.data = data
+                    next_btn = self.driver.find_element(By.CSS_SELECTOR, "a.nav.next")
+                    disable_btn = 'disabled' in next_btn.get_attribute('class').split()
+                    if next_btn and not disable_btn:
+                        self.driver.execute_script("arguments[0].click();", next_btn)
+                        time.sleep(5)
+                    else:
+                        break
+                    
+                except Exception as e:
+                    print(e)
+                    break
 
         except Exception as e:
             print("erreur:", e)
+        
+
+
+
+trp = Tripadvisor(url="https://www.tripadvisor.fr/Hotel_Review-g1056032-d1055274-Reviews-Madame_Vacances_Les_Chalets_de_Berger-La_Feclaz_Savoie_Auvergne_Rhone_Alpes.html")
+trp.execute()
+# print(trp.data)

@@ -77,6 +77,17 @@ class ERApi:
                 )
             else:
                 messagebox.askyesno("Information", "Identifiant non spécifié!!!")
+
+        elif self.method == 'postmulti':
+
+            url = f'{self.api_url}reviews/multi'
+            files=[]
+            headers = self.headers
+
+            response = requests.request("POST", url, headers=headers, data=self.body, files=files)
+
+            return response
+
         else:
             self.add_header({"Content-Type": "application/json"})
             response = getattr(requests, self.method)(
