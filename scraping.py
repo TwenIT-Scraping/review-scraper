@@ -127,7 +127,7 @@ class Scraping(object):
         
         self.format()
         # print(self.formated_data)
-        # print(len(self.data))
+        print(len(self.data), "reviews saved!")
         Review.save_multi(self.formated_data)
 
         # for item in self.data:
