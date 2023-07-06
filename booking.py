@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 from langdetect import detect
+from tools import month_number
 
 
 class Booking(Scraping):
@@ -49,6 +50,11 @@ class Booking(Scraping):
                 detail = card.find('span', {'class': 'c-review__body'}).text.strip().replace('\n', ' ') if card.find('span', {'class': 'c-review__body'}) else ""
                 comment = f"{title}{': ' if title and detail else ''}{detail}"
 
+                raw_date = card.find_all('span', {'class': 'c-review-block__date'})[1].text.strip() if len(card.find_all('span', {'class': 'c-review-block__date'})) > 1 else ""
+                dates = raw_date.split()
+
+                date_review = f"{dates[3]}/{month_number(dates[4], detect(dates[4]))}/{dates[5]}"
+
                 try:
                     lang = detect(comment)
                 except: 
@@ -59,6 +65,7 @@ class Booking(Scraping):
                         'comment': comment,
                         'rating': card.find('div', {'class': 'bui-review-score__badge'}).text.strip() \
                                     if card.find('div', {'class': 'bui-review-score__badge'}) else "0",
+                        'date_review': date_review,
                         'language': lang,
                         'source': urlparse(self.url).netloc.split('.')[1],
                         'author': card.find('span', {'class': 'bui-avatar-block__title'}).text.strip() if card.find('span', {'class': 'bui-avatar-block__title'}) else "",
@@ -67,6 +74,8 @@ class Booking(Scraping):
                 except Exception as e:
                     print(e)
                     continue
+            
+            # break
 
             try:
 
