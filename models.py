@@ -122,12 +122,10 @@ class Review(EReputationBase):
 
     @staticmethod
     def save_multi(data_content):
-        print(" ==== save multi ====")
-        print(data_content)
         req = ERApi(method="postmulti", entity=f"reviews/multi")
         req.set_body({'data_content': data_content})
         res = req.execute()
-        print(res.text)
+        # print(res.text)
 
 # etab = Establishment(rid=2)
 # etab.refresh()
