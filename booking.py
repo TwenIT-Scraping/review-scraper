@@ -27,15 +27,15 @@ class Booking(Scraping):
 
         reviews = []
 
-        try:
-            review_btn = self.driver.find_element(By.XPATH, "//a[@data-target='hp-reviews-sliding']")
+        # try:
+        #     review_btn = self.driver.find_element(By.XPATH, "//a[@data-target='hp-reviews-sliding']")
 
-            if review_btn:
-                self.driver.execute_script("arguments[0].click();", review_btn)
-                time.sleep(5)
+        #     if review_btn:
+        #         self.driver.execute_script("arguments[0].click();", review_btn)
+        #         time.sleep(5)
 
-        except Exception as e:
-            print(e)
+        # except Exception as e:
+        #     print(e)
 
         while True:
 
@@ -43,17 +43,20 @@ class Booking(Scraping):
 
             soupe = BeautifulSoup(page, 'lxml')
 
-            review_cards = soupe.find_all('div', {'itemprop': 'review'})
+            review_cards = soupe.find_all('li', {'itemprop': 'review'})
+            print(len(review_cards))
 
             for card in review_cards:
-                title = card.find('h3', {'class': 'c-review-block__title'}).text.strip() if card.find('h3', {'class': 'c-review-block__title'}) else ""
-                detail = card.find('span', {'class': 'c-review__body'}).text.strip().replace('\n', ' ') if card.find('span', {'class': 'c-review__body'}) else ""
+                title = card.find('div', {'class': 'review_item_header_content'}).text.strip() if card.find('div', {'class': 'review_item_header_content'}) else ""
+                negative = card.find('p', {'class': 'review_neg'}).text.strip() if card.find('p', {'class': 'review_neg'}) else ""
+                positive = card.find('p', {'class': 'review_pos'}).text.strip() if card.find('p', {'class': 'review_pos'}) else ""
+                detail = f'{positive} | {negative}' if positive and negative else (positive if positive else negative)
                 comment = f"{title}{': ' if title and detail else ''}{detail}"
 
-                raw_date = card.find_all('span', {'class': 'c-review-block__date'})[1].text.strip() if len(card.find_all('span', {'class': 'c-review-block__date'})) > 1 else ""
+                raw_date = card.find('p', {'class': 'review_item_date'}).text.strip() if card.find('p', {'class': 'review_item_date'}) else ""
                 dates = raw_date.split()
 
-                date_review = f"{dates[3]}/{month_number(dates[4], detect(dates[4]))}/{dates[5]}"
+                date_review = f"{dates[3]}/{month_number(dates[4], 'fr')}/{dates[5]}"
 
                 try:
                     lang = detect(comment)
@@ -63,12 +66,12 @@ class Booking(Scraping):
                 try:
                     reviews.append({
                         'comment': comment,
-                        'rating': card.find('div', {'class': 'bui-review-score__badge'}).text.strip() \
-                                    if card.find('div', {'class': 'bui-review-score__badge'}) else "0",
+                        'rating': card.find('span', {'class': 'review-score-badge'}).text.strip() \
+                                    if card.find('span', {'class': 'review-score-badge'}) else "0",
                         'date_review': date_review,
                         'language': lang,
                         'source': urlparse(self.url).netloc.split('.')[1],
-                        'author': card.find('span', {'class': 'bui-avatar-block__title'}).text.strip() if card.find('span', {'class': 'bui-avatar-block__title'}) else "",
+                        'author': card.find('p', {'class': 'reviewer_name'}).text.strip() if card.find('p', {'class': 'reviewer_name'}) else "",
                         'establishment': '/api/establishments/2'
                     })
                 except Exception as e:
@@ -79,7 +82,7 @@ class Booking(Scraping):
 
             try:
 
-                next_btn = self.driver.find_element(By.CLASS_NAME, 'pagenext')
+                next_btn = self.driver.find_element(By.ID, 'review_next_page_link')
 
                 if next_btn:
                     self.driver.execute_script("arguments[0].click();", next_btn)
@@ -88,9 +91,11 @@ class Booking(Scraping):
             except Exception as e:
                 break
 
+        print(reviews)
+
         self.data = reviews
 
 
-trp = Booking(url="https://www.booking.com/hotel/fr/ha-tel-le-christiania.fr.html")
+trp = Booking(url="https://www.booking.com/reviews/fr/hotel/la-belle-etoile-les-deux-alpes.fr.html")
 trp.execute()
 # print(trp.data)
