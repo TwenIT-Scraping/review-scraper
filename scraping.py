@@ -53,6 +53,8 @@ class Scraping(object):
         self.data = {}
         self.url = url
 
+        self.establishment = "-1"
+
     def permute_driver(self) -> None:
         self.driver.quit()
         if self.current_driver == 'firefox':
@@ -76,6 +78,9 @@ class Scraping(object):
         self.min_cycle = min
         self.max_cycle = max
         self.set_driver_cycle(randint(self.min_cycle, self.max_cycle))
+
+    def set_establishment(self, establishment):
+        self.establishment = establishment
 
     def increment_counter(self) -> None:
         self.counter = self.counter + 1
