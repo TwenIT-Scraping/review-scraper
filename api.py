@@ -56,8 +56,9 @@ class ERApi:
             else:
                 messagebox.askyesno("Information", "Identifiant non spécifié!!!")
             
-        elif self.method == 'update' or self.method == 'put':
+        elif self.method == 'patch' or self.method == 'put':
             if self.id != -1:
+                self.add_header({"Content-Type": "application/json"})
                 response = getattr(requests, self.method)(
                     f'{self.api_url}{self.entity}/{self.id}',
                     params=self.params,
@@ -145,7 +146,7 @@ class ERApi:
             all_data += results
             page += 1
             if len(results) == 0:
-                break;
+                break
         
         return all_data
 
