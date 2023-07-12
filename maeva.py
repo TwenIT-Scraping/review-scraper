@@ -20,7 +20,8 @@ class Maeva(Scraping):
         self.reviews = []
 
     def load_reviews(self) -> None:
-        results = int(''.join(filter(str.isdigit, self.driver.find_element(By.ID, 'avis-comp-content').find_element(By.CLASS_NAME, 'ml-1').text)))
+        self.driver.find_element(By.ID, 'avis-tout-cta').click()
+        results = int(''.join([x for x in self.driver.find_element(By.ID, 'avis-comp-content').find_element(By.CLASS_NAME, 'ml-1').text if x.isdigit()]))
         for i in range(results//3):
             self.driver.find_element(By.ID, 'avis-cards-content-container').click()
             for k in range(3):
@@ -35,12 +36,16 @@ class Maeva(Scraping):
             soup  = BeautifulSoup(self.driver.page_source, 'lxml')
             reviews = soup.find('div', {'id':'avis-cards-content-container'}).find_all('div', {'typeof':'comment'})
             for review in reviews:
+                date = review.find('span', {'property':'dateCreated'})['content']
                 data = {}
                 data['author'] = review.find('div', class_='date-publication').find('strong').text.strip()
-                data['date_post'] = review.find('span', {'property':'dateCreated'})['content']
+                data['date_review'] = '/'.join(date.split('-')[::-1])
                 data['comment'] = review.find('p', class_='avis-comment').text.strip() if review.find('p', class_='avis-comment') else ''
                 data['rating'] = review.find('span', class_='score-text').text if review.find('span', class_='score-text') else 0
+                data['language'] = detect(data['comment'])
+                data['establishement'] = '/api/establishments/4'
                 self.reviews.append(data)
+            print(self.reviews)
         except Exception as e:
             print('extraction file')
             print(e)
