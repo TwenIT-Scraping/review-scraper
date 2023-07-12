@@ -18,8 +18,6 @@ class Hotels(Scraping):
 
     def __init__(self, in_background: bool = False, url: str = "") -> None:
         super().__init__(in_background, url=url)
-        self.url = url 
-        self.reviews = []
 
     def close_popup(self) -> None:
         try:
@@ -67,22 +65,35 @@ class Hotels(Scraping):
             }
             date = date.split(' ')
             return f'{date[0]}/{date_format[date[1]]}/{date[2]}'
+
+        reviews = []
+
         self.load_reviews()
 
         soup = BeautifulSoup(self.driver.page_source, 'lxml')
-        reviews = soup.find('div', {'data-stid':'property-reviews-list'}).find_all('article', {'itemprop':'review'})
-        for review in reviews:
+        review_cards = soup.find('div', {'data-stid':'property-reviews-list'}).find_all('article', {'itemprop':'review'})
+
+        for review in review_cards:
             data = {}
             data['date_review'] = fomat_date(review.find('span', {'itemprop':'datePublished'}).text.strip())
             data['author'] = review.find('img').parent.text.split(',')[0]
             data['rating'] = review.find('span', {'itemprop':'ratingValue'}).text.split(' ')[0] if review.find('span', {'itemprop':'ratingValue'}) else '0'
             data['comment'] = review.find('span', {'itemprop':'description'}).text if review.find('span', {'itemprop':'description'}) else ''
-            data['language'] = detect(data['comment']) if data['comment'] else ''
-            data['establishement'] = '/api/establishments/3'
-            print(data)
-            self.reviews.append(data)
-        print(len(self.reviews))
-        print(self.reviews)
 
-trp = Hotels(url="https://fr.hotels.com/ho1100722624/okko-hotels-paris-gare-de-l-est-paris-france")
-trp.execute()
+            try:
+                data['language'] = detect(data['comment']) if data['comment'] else 'fr'
+
+            except:
+                data['language'] = 'fr'
+                data['comment'] = ''
+
+            data['establishment'] = '/api/establishments/3'
+            data['source'] = urlparse(self.url).netloc.split('.')[1]
+            # print(data)
+            reviews.append(data)
+        
+        self.data = reviews
+
+
+# trp = Hotels(url="https://fr.hotels.com/ho1100722624/okko-hotels-paris-gare-de-l-est-paris-france")
+# trp.execute()

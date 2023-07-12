@@ -5,12 +5,14 @@ from models import Establishment
 from booking import Booking
 from maeva import Maeva
 from campings import Campings
+from hotels import Hotels
 
 
 __class_name__ = {
     'booking': Booking,
     'maeva': Maeva,
-    'camping': Campings
+    'camping': Campings,
+    'hotels': Hotels
 }
 
 
