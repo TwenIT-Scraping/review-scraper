@@ -43,7 +43,7 @@ class Maeva(Scraping):
                 data['comment'] = review.find('p', class_='avis-comment').text.strip() if review.find('p', class_='avis-comment') else ''
                 data['rating'] = review.find('span', class_='score-text').text if review.find('span', class_='score-text') else 0
                 data['language'] = detect(data['comment'])
-                data['establishement'] = '/api/establishments/4'
+                data['establishement'] = '/api/establishments/3'
                 self.reviews.append(data)
             print(self.reviews)
         except Exception as e:
