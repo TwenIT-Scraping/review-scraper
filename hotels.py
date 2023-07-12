@@ -89,7 +89,7 @@ class Hotels(Scraping):
 
             data['establishment'] = f'/api/establishments/{self.establishment}'
             data['source'] = urlparse(self.url).netloc.split('.')[1]
-            # print(data)
+            
             reviews.append(data)
         
         self.data = reviews

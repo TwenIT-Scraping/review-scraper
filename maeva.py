@@ -45,7 +45,7 @@ class Maeva(Scraping):
                 data['rating'] = review.find('span', class_='score-text').text if review.find('span', class_='score-text') else 0
                 data['language'] = detect(data['comment'])
                 data['source'] = urlparse(self.url).netloc.split('.')[1]
-                data['establishment'] = '/api/establishments/3'
+                data['establishment'] = f'/api/establishments/{self.establishment}'
                 reviews.append(data)
 
         except Exception as e:
@@ -55,5 +55,5 @@ class Maeva(Scraping):
         self.data = reviews
 
 
-# trp = Maeva(url="https://www.maeva.com/fr-fr/residence-pierre---vacances-douchka_21505.html")
-# trp.execute()
+trp = Maeva(url="https://www.maeva.com/fr-fr/residence-pierre---vacances-douchka_21505.html")
+trp.execute()
