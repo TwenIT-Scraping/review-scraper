@@ -16,8 +16,6 @@ from langdetect import detect
 class Maeva(Scraping):
     def __init__(self, in_background: bool = False, url: str = "") -> None:
         super().__init__(in_background, url=url)
-        self.url = url
-        self.reviews = []
 
     def load_reviews(self) -> None:
         self.driver.find_element(By.ID, 'avis-tout-cta').click()
@@ -32,10 +30,13 @@ class Maeva(Scraping):
 
         self.load_reviews()
 
+        reviews = []
+
         try:
             soup  = BeautifulSoup(self.driver.page_source, 'lxml')
-            reviews = soup.find('div', {'id':'avis-cards-content-container'}).find_all('div', {'typeof':'comment'})
-            for review in reviews:
+            review_cards = soup.find('div', {'id':'avis-cards-content-container'}).find_all('div', {'typeof':'comment'})
+            
+            for review in review_cards:
                 date = review.find('span', {'property':'dateCreated'})['content']
                 data = {}
                 data['author'] = review.find('div', class_='date-publication').find('strong').text.strip()
@@ -43,13 +44,16 @@ class Maeva(Scraping):
                 data['comment'] = review.find('p', class_='avis-comment').text.strip() if review.find('p', class_='avis-comment') else ''
                 data['rating'] = review.find('span', class_='score-text').text if review.find('span', class_='score-text') else 0
                 data['language'] = detect(data['comment'])
-                data['establishement'] = '/api/establishments/3'
-                self.reviews.append(data)
-            print(self.reviews)
+                data['source'] = urlparse(self.url).netloc.split('.')[1]
+                data['establishment'] = '/api/establishments/3'
+                reviews.append(data)
+
         except Exception as e:
             print('extraction file')
             print(e)
 
+        self.data = reviews
 
-trp = Maeva(url="https://www.maeva.com/fr-fr/residence-pierre---vacances-douchka_21505.html")
-trp.execute()
+
+# trp = Maeva(url="https://www.maeva.com/fr-fr/residence-pierre---vacances-douchka_21505.html")
+# trp.execute()
