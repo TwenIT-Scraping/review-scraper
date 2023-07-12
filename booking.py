@@ -25,6 +25,8 @@ class Booking(Scraping):
 
     def extract(self):
 
+        print("Id établissement: ", self.establishment)
+
         reviews = []
 
         # try:
@@ -72,7 +74,7 @@ class Booking(Scraping):
                         'language': lang,
                         'source': urlparse(self.url).netloc.split('.')[1],
                         'author': card.find('p', {'class': 'reviewer_name'}).text.strip() if card.find('p', {'class': 'reviewer_name'}) else "",
-                        'establishment': '/api/establishments/2'
+                        'establishment': f'/api/establishments/{self.establishment}'
                     })
                 except Exception as e:
                     print(e)
@@ -94,6 +96,6 @@ class Booking(Scraping):
         self.data = reviews
 
 
-trp = Booking(url="https://www.booking.com/reviews/fr/hotel/la-belle-etoile-les-deux-alpes.fr.html")
-trp.execute()
+# trp = Booking(url="https://www.booking.com/reviews/fr/hotel/la-belle-etoile-les-deux-alpes.fr.html")
+# trp.execute()
 # print(trp.data)
