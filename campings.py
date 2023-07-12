@@ -66,6 +66,6 @@ class Campings(Scraping):
         self.data = reviews
 
 
-trp = Campings(url="https://www.campings.com/fr/camping/le-pearl-camping-paradis-76750#reviews")
-trp.execute()
+# trp = Campings(url="https://www.campings.com/fr/camping/le-pearl-camping-paradis-76750#reviews")
+# trp.execute()
 # print(trp.data)
