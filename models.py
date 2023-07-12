@@ -12,6 +12,7 @@ class EReputationBase:
     def refresh(self) -> None:
         req = ERApi(method="getone", entity=self.entity, id=self.id)
         res = req.execute()
+        
         for key, value in res.items():
             setattr(self, key, value)
 
@@ -42,14 +43,8 @@ class EReputationBase:
 
     def get_elements(self, attribute: str) -> list:
         if self.id != -1 and len(getattr(self, attribute, [])):
-            websites = []
-            
-            for element in getattr(self, attribute):
-                req = ERApi(entity=attribute, id=self.extract_id(element))
-                res = req.execute()
-                websites.append(res[0])
 
-            return websites
+            return getattr(self, attribute)
         return []
 
 
@@ -67,6 +62,7 @@ class Website(EReputationBase):
         self.expedia = None
         self.camping = None
         self.booking = None
+        self.maeva = None
         self.entity = "websites"
 
 
