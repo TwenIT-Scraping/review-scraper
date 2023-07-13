@@ -36,14 +36,72 @@ months_en = {
 def month_number(name, lang):
     return globals()[f"months_{lang}"][name]
 
-def get_score(text):
-    model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
-    model = AutoModelForSequenceClassification.from_pretrained(model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    classifier = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
-    print(classifier(text))
 
-get_score("Leur service n'est pas au top")
+class ReviewScore:
+
+    # def __init__(self):
+        # self.model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
+        # self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
+        # self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        # self.classifier = pipeline('sentiment-analysis', model=self.model, tokenizer=self.tokenizer)
+
+    def get_score(self, text, lang):
+        if lang in ['en', 'nl', 'de', 'fr', 'it', 'es']:
+            return self.classifier(text.replace('\"', "\'"))
+        else:
+            return False
+
+    def update_scores(self):
+        for review_id in range(1, 5):
+            print("set value for ", review_id)
+            try:
+                get_instance = ERApi(method='getone', entity='reviews', id=review_id)
+                review_data = get_instance.execute()
+
+                patch_instance = ERApi(method='put', entity='reviews', id=review_id)
+                body = {}
+
+                if review_data['comment']:
+                    score_data = self.get_score(review_data['comment'])
+                    score_value = score_data['score']
+                    score_label = score_data['label']
+                    score_stars = int(score_label.split()[0])
+                    feeling = "negative" if score_stars < 3 else ("positive" if score_stars > 3 else "neutre")
+
+                    if feeling == "negative":
+                        confidence = -1 * score_value
+                    elif feeling == "neutre":
+                        confidence = 0
+                    else:
+                        confidence = score_value
+
+                    body = {'score': score_value, 'confidence': confidence, 'feeling': feeling}
+                
+                else:
+                    body = {'score': 0, 'confidence': 0, 'feeling': "neutre"}
+                
+                patch_instance.set_body(body)
+
+                try:
+                    patch_instance.execute()
+                except Exception as e:
+                    print(e)
+                    
+            except Exception as e:
+                print(e)
+                pass
+
+
+# def get_score(text):
+    
+#     print(classifier(text))
+
+# get_score("Leur service n'est pas au top")
+
+review_score = ReviewScore()
+review_score.update_scores()
+
+
 
 def random_score():
 
