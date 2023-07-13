@@ -55,5 +55,5 @@ class Maeva(Scraping):
         self.data = reviews
 
 
-trp = Maeva(url="https://www.maeva.com/fr-fr/residence-pierre---vacances-douchka_21505.html")
-trp.execute()
+# trp = Maeva(url="https://www.maeva.com/fr-fr/residence-pierre---vacances-douchka_21505.html")
+# trp.execute()
