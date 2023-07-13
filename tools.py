@@ -47,12 +47,17 @@ class ReviewScore:
 
     def get_score(self, text, lang):
         if lang in ['en', 'nl', 'de', 'fr', 'it', 'es']:
-            return self.classifier(text.replace('\"', "\'"))
+            try:
+                return self.classifier(text.replace('\"', "\'"))
+            except Exception as e:
+                print(e)
+                return False
         else:
+            print("Langue inconnue !!! => ", lang)
             return False
 
     def update_scores(self):
-        for review_id in range(1, 5):
+        for review_id in range(1, 5187):
             print("set value for ", review_id)
             try:
                 get_instance = ERApi(method='getone', entity='reviews', id=review_id)
@@ -62,28 +67,35 @@ class ReviewScore:
                 body = {}
 
                 if review_data['comment']:
-                    score_data = self.get_score(review_data['comment'])
-                    score_value = score_data['score']
-                    score_label = score_data['label']
-                    score_stars = int(score_label.split()[0])
-                    feeling = "negative" if score_stars < 3 else ("positive" if score_stars > 3 else "neutre")
+                    score_data = self.get_score(review_data['comment'], review_data['language'] )
 
-                    if feeling == "negative":
-                        confidence = -1 * score_value
-                    elif feeling == "neutre":
-                        confidence = 0
+                    if score_data:
+                        score_value = score_data[0]['score']
+                        score_label = score_data[0]['label']
+                        score_stars = int(score_label.split()[0])
+                        feeling = "negative" if score_stars < 3 else ("positive" if score_stars > 3 else "neutre")
+
+                        if feeling == "negative":
+                            confidence = -1 * score_value
+                        elif feeling == "neutre":
+                            confidence = 0
+                        else:
+                            confidence = score_value
+
+                        body = {'score': score_value, 'confidence': confidence, 'feeling': feeling}
+                    
                     else:
-                        confidence = score_value
-
-                    body = {'score': score_value, 'confidence': confidence, 'feeling': feeling}
+                        body = {'score': 0, 'confidence': 0, 'feeling': "neutre"}
                 
                 else:
                     body = {'score': 0, 'confidence': 0, 'feeling': "neutre"}
                 
                 patch_instance.set_body(body)
+               # print(body)
 
                 try:
-                    patch_instance.execute()
+                    res = patch_instance.execute()
+                    print(res)
                 except Exception as e:
                     print(e)
                     
