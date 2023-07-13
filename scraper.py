@@ -6,13 +6,15 @@ from booking import Booking
 from maeva import Maeva
 from campings import Campings
 from hotels import Hotels
+from googles import Google
 
 
 __class_name__ = {
     'booking': Booking,
     'maeva': Maeva,
     'camping': Campings,
-    'hotels': Hotels
+    'hotels': Hotels,
+    'google': Google
 }
 
 
