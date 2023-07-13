@@ -39,11 +39,11 @@ def month_number(name, lang):
 
 class ReviewScore:
 
-    # def __init__(self):
-        # self.model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
-        # self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
-        # self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        # self.classifier = pipeline('sentiment-analysis', model=self.model, tokenizer=self.tokenizer)
+    def __init__(self):
+        self.model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.classifier = pipeline('sentiment-analysis', model=self.model, tokenizer=self.tokenizer)
 
     def get_score(self, text, lang):
         if lang in ['en', 'nl', 'de', 'fr', 'it', 'es']:
