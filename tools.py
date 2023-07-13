@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassifier, pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from api import ERApi
 from random import randint, random
 
@@ -43,7 +43,7 @@ def get_score(text):
     classifier = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
     print(classifier(text))
 
-# get_score("Leur service n'est pas au top")
+get_score("Leur service n'est pas au top")
 
 def random_score():
 
