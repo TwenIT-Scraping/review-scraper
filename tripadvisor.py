@@ -74,7 +74,6 @@ class Tripadvisor(Scraping):
                         break
                     
                 except Exception as e:
-                    print(e)
                     break
 
             self.data = reviews
