@@ -24,8 +24,6 @@ class OpenTable(Scraping):
         self.reviews_data = []
 
     def extract(self):
- 
-        p = 1
 
         while True:
             page = self.driver.page_source
@@ -44,20 +42,16 @@ class OpenTable(Scraping):
             if soupe.find('section', {'id':'reviews'}) and soupe.find('section', {'id':'reviews'}).find('ol',{'data-test': 'reviews-list'}):
                 reviews_list = soupe.find('section', {'id':'reviews'}).find('ol',{'data-test': 'reviews-list'}).find_all('li')
 
-            ligne = 1
-
             for item in reviews_list:
                 
                 comment = item.find('span', {'data-test':'wrapper-tag'}).text.strip() if item.find('span', {'data-test':'wrapper-tag'}) else ""
-                By.XPATH, "//button[contains(text(), 'See all reviews')]"
+
                 try:
                     rating_container = item.find('span', string='overall').parent
                     rating_items = rating_container.find_all('span')
                     rating = str(int(sum(map(lambda x: int(x.text.strip()), [rating_items[1], rating_items[3], rating_items[5], rating_items[7]]))/4)) + '/5'
-                    print(rating)
                 except Exception as e:
                     rating = "0/5"
-                    print(p, ligne)
                     print(e)
 
                 try:
@@ -65,17 +59,26 @@ class OpenTable(Scraping):
                 except:
                     lang = 'en'
 
+                try:
+                    date_raw = item.find('p', {'class': 'Xfrgl6cRPxn4vwFrFgk1'}).text.strip()
+                    if date_raw[:8] == 'Dined on':
+                        date = date_raw[9:]
+                        review_date = datetime.strftime(datetime.strptime(date, '%B %d, %Y'), '%d/%m/%Y')
+                    elif date_raw[-8:] == 'days ago':
+                        review_date = datetime.strftime(datetime.now() + timedelta(days=-int(date_raw.split()[1])), '%d/%m/%Y')
+                except:
+                    review_date = '2022/01/01'
+
                 self.reviews_data.append({
                     'comment': comment,
                     'language': lang,
-                    'rating': "1/5",
+                    'rating': rating,
                     'source': urlparse(self.url).netloc.split('.')[1],
-                    # 'author': ', '.join([item.find_all('section')[0].find_all('p')[0].text.strip(), item.find_all('section')[0].find_all('p')[1].text.strip()]),
-                    'establishment': '/api/establishments/2'
+                    'author': item.find_all('section')[0].find_all('p')[0].text.strip(),
+                    'establishment': f'/api/establishments/{self.establishment}',
+                    'review_date': review_date
                 })
-
-                ligne += 1
-
+                
             try:
                 next_btn_div = self.driver.find_element(By.XPATH, "//div[@data-test='pagination-next']")
                 
@@ -95,10 +98,9 @@ class OpenTable(Scraping):
             except Exception as e:
                 print(e)
                 break
-        
-            p += 1
 
         print(len(self.reviews_data))
+        
 
         # self.data = reviews
 

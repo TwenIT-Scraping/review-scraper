@@ -54,7 +54,7 @@ class Scraping(object):
         self.data = {}
         self.url = url
 
-        self.establishment = "-1"
+        self.establishment = "3"
 
     def permute_driver(self) -> None:
         self.driver.quit()

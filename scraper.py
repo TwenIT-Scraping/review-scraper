@@ -7,6 +7,7 @@ from maeva import Maeva
 from campings import Campings
 from hotels import Hotels
 from googles import Google
+from opentable import Opentable
 
 
 __class_name__ = {
@@ -14,7 +15,8 @@ __class_name__ = {
     'maeva': Maeva,
     'camping': Campings,
     'hotels': Hotels,
-    'google': Google
+    'google': Google,
+    'opentable': OpenTable
 }
 
 
