@@ -93,6 +93,6 @@ class Expedia(Scraping):
         self.data = reviews
 
 
-trp = Expedia(url="https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews")
-trp.execute()
+# trp = Expedia(url="https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews")
+# trp.execute()
 # print(trp.data)

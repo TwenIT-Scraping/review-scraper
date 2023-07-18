@@ -57,7 +57,7 @@ class Trustpilot(Scraping):
                     'language': lang,
                     'source': urlparse(self.url).netloc.split('.')[1],
                     'author': card.find('span', {'data-consumer-name-typography': 'true'}).text.strip() if card.find('span', {'data-consumer-name-typography': 'true'}) else "",
-                    'establishment': '/api/establishments/4'
+                    'establishment': f'/api/establishments/{self.establishment}'
                 })
 
             try:
@@ -79,6 +79,6 @@ class Trustpilot(Scraping):
         self.data = reviews
 
 
-trp = Trustpilot(url="https://fr.trustpilot.com/review/liberkeys.com")
-trp.execute()
+# trp = Trustpilot(url="https://fr.trustpilot.com/review/liberkeys.com")
+# trp.execute()
 # print(trp.data)

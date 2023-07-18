@@ -80,6 +80,6 @@ class Tripadvisor(Scraping):
 
 
 
-trp = Tripadvisor(url="https://www.tripadvisor.fr/Hotel_Review-g1056032-d1055274-Reviews-Madame_Vacances_Les_Chalets_de_Berger-La_Feclaz_Savoie_Auvergne_Rhone_Alpes.html")
-trp.execute()
+# trp = Tripadvisor(url="https://www.tripadvisor.fr/Hotel_Review-g1056032-d1055274-Reviews-Madame_Vacances_Les_Chalets_de_Berger-La_Feclaz_Savoie_Auvergne_Rhone_Alpes.html")
+# trp.execute()
 # print(trp.data)
