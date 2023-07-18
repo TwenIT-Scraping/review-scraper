@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+# from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from api import ERApi
 from random import randint, random
 
@@ -33,111 +33,94 @@ months_en = {
     'December': '12'
 }
 
-def month_number(name, lang):
-    return globals()[f"months_{lang}"][name]
+shortmonths_fr = {
+    'janv.':'01',
+    'févr.':'02',
+    'mars':'03',
+    'avr.':'04',
+    'mai': '05',
+    'juin':'06',
+    'juil.':'07',
+    'août':'08',
+    'sept.':'09',
+    'oct.':'10',
+    'nov.':'11',
+    'déc.':'12'
+}
 
-
-class ReviewScore:
-
-    def __init__(self):
-        self.model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.classifier = pipeline('sentiment-analysis', model=self.model, tokenizer=self.tokenizer)
-
-    def get_score(self, text, lang):
-        if lang in ['en', 'nl', 'de', 'fr', 'it', 'es']:
-            try:
-                return self.classifier(text.replace('\"', "\'"))
-            except Exception as e:
-                print(e)
-                return False
-        else:
-            print("Langue inconnue !!! => ", lang)
-            return False
-
-    def update_scores(self):
-        for review_id in range(1, 5187):
-            print("set value for ", review_id)
-            try:
-                get_instance = ERApi(method='getone', entity='reviews', id=review_id)
-                review_data = get_instance.execute()
-
-                patch_instance = ERApi(method='put', entity='reviews', id=review_id)
-                body = {}
-
-                if review_data['comment']:
-                    score_data = self.get_score(review_data['comment'], review_data['language'] )
-
-                    if score_data:
-                        score_value = score_data[0]['score']
-                        score_label = score_data[0]['label']
-                        score_stars = int(score_label.split()[0])
-                        feeling = "negative" if score_stars < 3 else ("positive" if score_stars > 3 else "neutre")
-
-                        if feeling == "negative":
-                            confidence = -1 * score_value
-                        elif feeling == "neutre":
-                            confidence = 0
-                        else:
-                            confidence = score_value
-
-                        body = {'score': score_value, 'confidence': confidence, 'feeling': feeling}
-                    
-                    else:
-                        body = {'score': 0, 'confidence': 0, 'feeling': "neutre"}
-                
-                else:
-                    body = {'score': 0, 'confidence': 0, 'feeling': "neutre"}
-                
-                patch_instance.set_body(body)
-               # print(body)
-
-                try:
-                    res = patch_instance.execute()
-                    print(res)
-                except Exception as e:
-                    print(e)
-                    
-            except Exception as e:
-                print(e)
-                pass
-
-
-# def get_score(text):
-    
-#     print(classifier(text))
-
-# get_score("Leur service n'est pas au top")
-
-review_score = ReviewScore()
-review_score.update_scores()
+def month_number(name, lang, t=""):
+    return globals()[f"{t}months_{lang}"][name]
 
 
 
-def random_score():
+# class ReviewScore:
 
-    for review_id in range(2168, 4496):
-        print("set value for ", review_id)
-        patch_instance = ERApi(method='put', entity='reviews', id=review_id)
-        score = float("%.2f" % random())
-        feeling = ["negative", "neutre", "positive"][randint(0,2)]
+#     def __init__(self):
+#         self.model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
+#         self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
+#         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+#         self.classifier = pipeline('sentiment-analysis', model=self.model, tokenizer=self.tokenizer)
 
-        if feeling == "negative":
-            confidence = -1 * score
-        elif feeling == "neutre":
-            confidence = 0
-        else:
-            confidence = score
+#     def get_score(self, text, lang):
+#         if lang in ['en', 'nl', 'de', 'fr', 'it', 'es']:
+#             try:
+#                 return self.classifier(text.replace('\"', "\'"))
+#             except Exception as e:
+#                 print(e)
+#                 return False
+#         else:
+#             print("Langue inconnue !!! => ", lang)
+#             return False
+
+#     def compute_score(self, text, lang):
+#         score_data = self.get_score(text, lang )
+
+#         if score_data:
+#             score_value = score_data[0]['score']
+#             score_label = score_data[0]['label']
+#             score_stars = int(score_label.split()[0])
+#             feeling = "negative" if score_stars < 3 else ("positive" if score_stars > 3 else "neutre")
+
+#             if feeling == "negative":
+#                 confidence = -1 * score_value
+#             elif feeling == "neutre":
+#                 confidence = 0
+#             else:
+#                 confidence = score_value
+
+#             return {'score': score_value, 'confidence': confidence, 'feeling': feeling}
         
-        body = {"feeling": feeling, "confidence": confidence, "score": score}
+#         else:
+#             return {'score': 0, 'confidence': 0, 'feeling': "neutre"}
 
-        patch_instance.set_body(body)
+#     def update_scores(self):
+#         for review_id in range(1, 5187):
+#             print("set value for ", review_id)
+#             try:
+#                 get_instance = ERApi(method='getone', entity='reviews', id=review_id)
+#                 review_data = get_instance.execute()
 
-        try:
-            res = patch_instance.execute()
-        except Exception as e:
-            print(e)
+#                 patch_instance = ERApi(method='put', entity='reviews', id=review_id)
+#                 body = {}
+
+#                 if review_data['comment']:
+#                     body = self.compute_score(review_data['comment'], review_data['language'])
+#                 else:
+#                     body = {'score': 0, 'confidence': 0, 'feeling': "neutre"}
+                
+#                 patch_instance.set_body(body)
+#                # print(body)
+
+#                 try:
+#                     res = patch_instance.execute()
+#                     print(res)
+#                 except Exception as e:
+#                     print(e)
+                    
+#             except Exception as e:
+#                 print(e)
+#                 pass
 
 
-# random_score()
+# review_score = ReviewScore()
+# review_score.update_scores()

@@ -12,10 +12,12 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from abc import abstractmethod
 import sys
 import time
+import re
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 from langdetect import detect
+from tools import month_number
 
 
 class Tripadvisor(Scraping):
@@ -32,15 +34,9 @@ class Tripadvisor(Scraping):
                 soupe = BeautifulSoup(page, 'lxml')
 
                 reviews_card = soupe.find_all('div', {'data-test-target':"HR_CC_CARD"})
-                
-                print(len(reviews))
 
                 for item in reviews_card:
-                    # try:
-                    #     review['reviewLangage'] = detect(review['reviewsText'])
-                    # except:
-                    #     print("Erreur langue: ", review['reviewsText'])
-                    #     review['reviewLangage'] = 'en'
+
                     title = item.find('div', {'data-test-target':'review-title'}).text.strip() if item.find('div', {'data-test-target':'review-title'}) else ''
                     detail = item.find('span', {'class':'QewHA'}).find('span').text.strip().replace('\n', '') if item.find('span', {'class':'QewHA'}) else ''
                     comment = f"{title}{': ' if title and detail else ''}{detail}"
@@ -50,16 +46,23 @@ class Tripadvisor(Scraping):
                     except:
                         lang = 'en'
 
-                    reviews.append({
+                    date_raw = re.search(r"\(.*\)", item.find('div', {'class': 'cRVSd'}).text.strip()).group()
+                    month = date_raw.split()[0][1:]
+                    year = date_raw.split()[1][:-1]
+
+                    review_data = {
                         'comment': comment,
-                        'rating': str(int(item.find('span', class_='ui_bubble_rating')['class'][1].split('_')[1]) / 10) if item.find('span', class_='ui_bubble_rating') else "0",
+                        'rating': str(int(item.find('span', class_='ui_bubble_rating')['class'][1].split('_')[1]) / 10) + "/5" if item.find('span', class_='ui_bubble_rating') else "0/5",
                         'language': lang,
                         'source': urlparse(self.url).netloc.split('.')[1],
                         'author': item.find('a', class_='ui_header_link').text.strip() if item.find('a', class_='ui_header_link') else "",
-                        'establishment': '/api/establishments/4'
-                    })
+                        'establishment': f'/api/establishments/{self.establishment}',
+                        'date_review': f"01/{month_number(month, 'fr', 'short')}/{year}"
+                    }
 
-                self.data = reviews
+                    reviews.append(review_data)
+
+                print(len(reviews))
 
                 try:
                     next_btn = self.driver.find_element(By.CSS_SELECTOR, "a.nav.next")
@@ -74,12 +77,14 @@ class Tripadvisor(Scraping):
                     print(e)
                     break
 
+            self.data = reviews
+
         except Exception as e:
             print("erreur:", e)
         
 
 
 
-# trp = Tripadvisor(url="https://www.tripadvisor.fr/Hotel_Review-g1056032-d1055274-Reviews-Madame_Vacances_Les_Chalets_de_Berger-La_Feclaz_Savoie_Auvergne_Rhone_Alpes.html")
-# trp.execute()
+trp = Tripadvisor(url="https://www.tripadvisor.fr/Hotel_Review-g1056032-d1055274-Reviews-Madame_Vacances_Les_Chalets_de_Berger-La_Feclaz_Savoie_Auvergne_Rhone_Alpes.html")
+trp.execute()
 # print(trp.data)

@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 from langdetect import detect
-
+from tools import month_number
 
 
 class Hotels(Scraping):
@@ -49,22 +49,8 @@ class Hotels(Scraping):
 
     def extract(self) -> None:
         def fomat_date(date:str) -> str:
-            date_format = {
-                'janv.':'01',
-                'févr.':'02',
-                'mars':'03',
-                'avr.':'04',
-                'mai': '05',
-                'juin':'06',
-                'juil.':'07',
-                'août':'08',
-                'sept.':'09',
-                'oct.':'10',
-                'nov.':'11',
-                'déc.':'12'
-            }
             date = date.split(' ')
-            return f'{date[0]}/{date_format[date[1]]}/{date[2]}'
+            return f'{date[0]}/{month_number(date[1], 'fr', 'short')}/{date[2]}'
 
         reviews = []
 
