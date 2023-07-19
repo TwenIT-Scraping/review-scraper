@@ -9,6 +9,8 @@ from trustpilot import Trustpilot
 from tripadvisor import Tripadvisor
 from expedia import Expedia
 from api import ERApi
+import random
+from changeip import refresh_connection
 
 
 __class_name__ = {
@@ -40,9 +42,13 @@ class ListScraper:
 
     def start(self):
         for item in self.establishments:
+            time.sleep(random.randint(1,5))
+            refresh_connection()
             print("Establishment: ", item.name)
 
             for site in item.websites.keys():
                 if site in __class_name__.keys():
                     instance = __class_name__[site](url=item.websites[site], establishment=item.id)
                     instance.execute()
+                    
+
