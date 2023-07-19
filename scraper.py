@@ -10,6 +10,7 @@ from googles import Google
 from opentable import Opentable
 from trustpilot import TrustPilot
 from tripadvisor import Tripadvisor
+from expedia import Expedia
 
 
 __class_name__ = {
@@ -20,7 +21,8 @@ __class_name__ = {
     'google': Google,
     'opentable': OpenTable,
     'trustpilot': TrustPilot,
-    'tripadvisor': tripadvisor
+    'tripadvisor': tripadvisor,
+    'expedia': Expedia
 }
 
 

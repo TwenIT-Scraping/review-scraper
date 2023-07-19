@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 from models import Review
-# from tools import ReviewScore
+from tools import ReviewScore
 
 
 class Scraping(object):
@@ -124,26 +124,20 @@ class Scraping(object):
 
     def format(self) -> None:
         result = ""
-        # review_score = ReviewScore()
+        review_score = ReviewScore()
 
         for item in self.data:
-            # score_data = review_score.compute(item['comment'], item['language'])
-            # result += '$'.join([item['author'], item['source'], item['language'], item['rating'], item['establishment'], item['date_review'], item['comment'], score_data['feeling'], score_data['score'], score_data['confidence']]) + "#"
-            result += '$'.join([item['author'], item['source'], item['language'], item['rating'], item['establishment'], item['date_review'], item['comment']]) + "#"
+            score_data = review_score.compute_score(item['comment'], item['language'])
+            result += '$'.join([item['author'], item['source'], item['language'], item['rating'], item['establishment'], item['date_review'], item['comment'], score_data['feeling'], score_data['score'], score_data['confidence']]) + "#"
 
         self.formated_data = result
 
     def save(self) -> None:
         
         self.format()
-        # print(self.formated_data)
         Review.save_multi(self.formated_data)
         print(len(self.data), "reviews uploaded!")
 
-        # for item in self.data:
-        #     r = Review(item)
-        #     res = r.save()
-        #     print(res['id'])
 
     @abstractmethod
     def extract(self) -> None:
