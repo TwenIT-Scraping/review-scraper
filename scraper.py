@@ -1,7 +1,4 @@
 from models import Establishment
-# from opentable import OpenTable
-# from tripadvisor import TripAdvisor
-# from expedia import Expedia
 from booking import Booking
 from maeva import Maeva
 from campings import Campings
@@ -48,31 +45,4 @@ class ListScraper:
             for site in item.websites.keys():
                 if site in __class_name__.keys():
                     instance = __class_name__[site](url=item.websites[site], establishment=item.id)
-                    print(instance.establishment)
-                    # print(instance)
-    #             if site == 'expedia':
-    #                 # print("item url: ", item.websites[site])
-    #                 # instance = Expedia(url=item.websites[site])
-    #                 # instance.execute()
-    #                 continue
-    #             elif site == 'booking':
-    #                 # print("item url: ", item.websites[site])
-    #                 instance = Booking(url=item.websites[site])
-    #                 instance.set_establishment(item.id)
-    #                 instance.execute()
-    #                 # continue
-    # #             elif site == 'tripadvisor':
-    # #                 # instance = TripAdvisor(url=item.websites[site])
-    # #                 # instance.execute()
-    # #                 continue
-    # #             elif site == 'opentable':
-    # #                 # print("Ici")
-    # #                 # instance = OpenTable(url=item.websites[site])
-    # #                 # instance.execute()
-    # #                 continue
-    # #             elif site == 'google':
-    # #                 continue
-    # #             elif site == 'trustpilot':
-    # #                 continue
-    #             elif site == 'camping':
-    #                 continue
+                    instance.execute()
