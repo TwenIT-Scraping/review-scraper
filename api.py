@@ -140,7 +140,7 @@ class ERApi:
         page = 1
 
         while True:
-            getreq = G2A('get', entity)
+            getreq = ERApi('get', entity)
             getreq.add_params({'page': page})
             results = getreq.execute()
             all_data += results
