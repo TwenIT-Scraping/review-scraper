@@ -21,8 +21,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 
 class Google(Scraping):
-    def __init__(self, url: str):
-        super().__init__(in_background=False, url=url)
+    def __init__(self, url: str, establishment: str):
+        super().__init__(in_background=False, url=url, establishment=establishment)
 
     def load_reviews(self):
         results = int(''.join([x for x in self.driver.find_element(By.CSS_SELECTOR, '#reviews > c-wiz > c-wiz > div > div > div > div > div.ChBWlb.TjtFVc > div.pDLIp > div > div.zhMoVd.nNUNpc > div.UkIqCb > div > span').text if x.isdigit()]))

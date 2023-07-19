@@ -14,8 +14,8 @@ from langdetect import detect
 
 
 class Maeva(Scraping):
-    def __init__(self, in_background: bool = False, url: str = "") -> None:
-        super().__init__(in_background, url=url)
+    def __init__(self, url: str, establishment: str):
+        super().__init__(in_background=False, url=url, establishment=establishment)
 
     def load_reviews(self) -> None:
         self.driver.find_element(By.ID, 'avis-tout-cta').click()

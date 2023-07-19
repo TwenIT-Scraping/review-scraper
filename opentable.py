@@ -18,9 +18,9 @@ from urllib.parse import urlparse, parse_qs
 from langdetect import detect
 
 
-class OpenTable(Scraping):
-    def __init__(self, in_background: bool = False, url: str = None):
-        super().__init__(in_background=in_background, url=url)
+class Opentable(Scraping):
+    def __init__(self, url: str, establishment: str):
+        super().__init__(in_background=False, url=url, establishment=establishment)
         self.reviews_data = []
 
     def extract(self):
@@ -105,7 +105,7 @@ class OpenTable(Scraping):
         # self.data = reviews
 
 
-trp = OpenTable()
-trp.set_url("https://www.opentable.com/the-belvedere")
-trp.execute()
+# trp = OpenTable()
+# trp.set_url("https://www.opentable.com/the-belvedere")
+# trp.execute()
 # print(trp.data)

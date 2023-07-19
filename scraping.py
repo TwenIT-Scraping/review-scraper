@@ -20,7 +20,7 @@ from tools import ReviewScore
 
 class Scraping(object):
 
-    def __init__(self, in_background: bool, url: str) -> None:
+    def __init__(self, in_background: bool, url: str, establishment: str = '3') -> None:
 
         # driver options
         self.chrome_options = webdriver.ChromeOptions()
@@ -54,7 +54,7 @@ class Scraping(object):
         self.data = {}
         self.url = url
 
-        self.establishment = "3"
+        self.establishment = establishment
 
     def permute_driver(self) -> None:
         self.driver.quit()

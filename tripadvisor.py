@@ -21,8 +21,8 @@ from tools import month_number
 
 
 class Tripadvisor(Scraping):
-    def __init__(self, in_background: bool = False, url: str = None):
-        super().__init__(in_background=in_background, url=url)
+    def __init__(self, url: str, establishment: str):
+        super().__init__(in_background=False, url=url, establishment=establishment)
 
     def extract(self):
         reviews = []
@@ -84,6 +84,6 @@ class Tripadvisor(Scraping):
 
 
 
-trp = Tripadvisor(url="https://www.tripadvisor.fr/Hotel_Review-g1056032-d1055274-Reviews-Madame_Vacances_Les_Chalets_de_Berger-La_Feclaz_Savoie_Auvergne_Rhone_Alpes.html")
-trp.execute()
+# trp = Tripadvisor(url="https://www.tripadvisor.fr/Hotel_Review-g1056032-d1055274-Reviews-Madame_Vacances_Les_Chalets_de_Berger-La_Feclaz_Savoie_Auvergne_Rhone_Alpes.html")
+# trp.execute()
 # print(trp.data)

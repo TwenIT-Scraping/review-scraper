@@ -16,8 +16,8 @@ from tools import month_number
 
 class Hotels(Scraping):
 
-    def __init__(self, in_background: bool = False, url: str = "") -> None:
-        super().__init__(in_background, url=url)
+    def __init__(self, url: str, establishment: str):
+        super().__init__(in_background=False, url=url, establishment=establishment)
 
     def close_popup(self) -> None:
         try:
@@ -50,7 +50,8 @@ class Hotels(Scraping):
     def extract(self) -> None:
         def fomat_date(date:str) -> str:
             date = date.split(' ')
-            return f'{date[0]}/{month_number(date[1], 'fr', 'short')}/{date[2]}'
+            month = month_number(date[1], 'fr', 'short')
+            return f'{date[0]}/{month}/{date[2]}'
 
         reviews = []
 
