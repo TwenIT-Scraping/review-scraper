@@ -16,15 +16,16 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 from langdetect import detect
+import random
 
 
 class Expedia(Scraping):
     def __init__(self, url: str):
         super().__init__(in_background=False, url=url)
 
-    def extract(self):
-
-        reviews = []
+    def load_reviews(self):
+        time.sleep(5)
+        print("\n Loading ... \n")
 
         try:
             all_btn = self.driver.find_element(By.XPATH, "//button[contains(text(), 'See all reviews')]")
@@ -39,60 +40,64 @@ class Expedia(Scraping):
         time.sleep(10)
 
         while True:
-            print("\n Extraction ... \n")
+            time.sleep(random.randint(1,10))
 
-            page = self.driver.page_source
+            try:
+                next_btn = self.driver.find_element(By.XPATH, "//button[contains(text(), 'More reviews')]")
 
-            soupe = BeautifulSoup(page, 'lxml')
-
-            # review_cards = soupe.find_all('article', {'itemprop': 'review'})
-            # for card in review_cards:
-            #     title = card.find('span', {'itemprop': 'name'}).text.strip() if card.find('span', {'itemprop': 'name'}) else ""
-            #     detail = card.find('span', {'itemprop': 'description'}).text.strip() if card.find('span', {'itemprop': 'description'}) else ""
-            #     comment = f"{title}{': ' if title and detail else ''}{detail}"
-
-            #     try:
-            #         lang = detect(comment)
-            #     except: 
-            #         lang = 'en'
+                if next_btn:
+                    self.driver.execute_script("arguments[0].click();", next_btn)
+                    time.sleep(random.randint(1,5))
+                else:
+                    break
                 
-            #     date_raw = card.find('span', {'itemprop': 'datePublished'}).text.strip() if card.find('span', {'itemprop': 'datePublished'}) else ""
-            #     date_review = datetime.strftime(datetime.strptime(date_raw, '%b %d, %Y'), '%d/%m/%Y') if date_raw else "01/01/2022"
+            except Exception as e:
+                break
 
-            #     try:
-            #         reviews.append({
-            #             'comment': comment,
-            #             'rating': card.find('span', {'itemprop': 'ratingValue'}).text.strip().split('/')[0] \
-            #                         if card.find('span', {'itemprop': 'ratingValue'}) else "",
-            #             'date_review': date_review,
-            #             'language': lang,
-            #             'source': urlparse(self.url).netloc.split('.')[1],
-            #             'author': card.find('h4').text.strip(),
-            #             'establishment': '/api/establishments/2'
-            #         })
-            #     except Exception as e:
-            #         print(e)
+    def extract(self):
 
-            # break
+        self.load_reviews()
 
-            print(soupe)
+        reviews = []
+        
+        print("\n Extraction ... \n")
 
-            # try:
-            #     next_btn = self.driver.find_element(By.XPATH, "//button[contains(text(), 'See all reviews')]")
+        page = self.driver.page_source
 
-            #     if next_btn:
-            #         self.driver.execute_script("arguments[0].click();", next_btn)
-            #         time.sleep(5)
-            #     else:
-            #         print("Bouton non trouvé !!!")
-            #         break
-                
-            # except Exception as e:
-            #     print(e)
+        soupe = BeautifulSoup(page, 'lxml')
 
+        review_cards = soupe.find_all('article', {'itemprop': 'review'})
+        for card in review_cards:
+            title = card.find('span', {'itemprop': 'name'}).text.strip() if card.find('span', {'itemprop': 'name'}) else ""
+            detail = card.find('span', {'itemprop': 'description'}).text.strip() if card.find('span', {'itemprop': 'description'}) else ""
+            comment = f"{title}{': ' if title and detail else ''}{detail}"
+
+            try:
+                lang = detect(comment)
+            except: 
+                lang = 'en'
+            
+            date_raw = card.find('span', {'itemprop': 'datePublished'}).text.strip() if card.find('span', {'itemprop': 'datePublished'}) else ""
+            date_review = datetime.strftime(datetime.strptime(date_raw, '%b %d, %Y'), '%d/%m/%Y') if date_raw else "01/01/2022"
+
+            try:
+                reviews.append({
+                    'comment': comment,
+                    'rating': card.find('span', {'itemprop': 'ratingValue'}).text.strip().split('/')[0] + "/10" \
+                                if card.find('span', {'itemprop': 'ratingValue'}) else "0/10",
+                    'date_review': date_review,
+                    'language': lang,
+                    'source': urlparse(self.url).netloc.split('.')[1],
+                    'author': card.find('h4').text.strip(),
+                    'establishment': f'/api/establishments/{self.establishment}'
+                })
+            except Exception as e:
+                print(e)
+
+        print("total: ", len(reviews))
         self.data = reviews
 
 
-# trp = Expedia(url="https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews")
-# trp.execute()
+trp = Expedia(url="https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews")
+trp.execute()
 # print(trp.data)
