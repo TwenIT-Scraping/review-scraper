@@ -8,9 +8,10 @@ from campings import Campings
 from hotels import Hotels
 from googles import Google
 from opentable import Opentable
-from trustpilot import TrustPilot
+from trustpilot import Trustpilot
 from tripadvisor import Tripadvisor
 from expedia import Expedia
+from api import ERApi
 
 
 __class_name__ = {
@@ -19,19 +20,22 @@ __class_name__ = {
     'camping': Campings,
     'hotels': Hotels,
     'google': Google,
-    'opentable': OpenTable,
-    'trustpilot': TrustPilot,
-    'tripadvisor': tripadvisor,
+    'opentable': Opentable,
+    'trustpilot': Trustpilot,
+    'tripadvisor': Tripadvisor,
     'expedia': Expedia
 }
 
 
 class ListScraper:
-    def __init__(self, ids):
+    def __init__(self,):
         self.establishments = []
-        self.ids = ids
+        self.ids = []
     
     def init(self):
+        etabs = ERApi.get_all('establishments')
+        self.ids = map(lambda x: x['id'], etabs)
+
         for item in self.ids:
             etab = Establishment(rid=item)
             etab.refresh()
@@ -39,15 +43,13 @@ class ListScraper:
 
     def start(self):
         for item in self.establishments:
-            print("Establishment: ")
-    #         # item.print()
-            # print(item.name)
-            # print(item.websites.keys())
+            print("Establishment: ", item.name)
+
             for site in item.websites.keys():
-                # print(site, item.websites[site])
                 if site in __class_name__.keys():
-                    instance = __class_name__[site](url=item.websites[site])
-                    print(instance)
+                    instance = __class_name__[site](url=item.websites[site], establishment=item.id)
+                    print(instance.establishment)
+                    # print(instance)
     #             if site == 'expedia':
     #                 # print("item url: ", item.websites[site])
     #                 # instance = Expedia(url=item.websites[site])
