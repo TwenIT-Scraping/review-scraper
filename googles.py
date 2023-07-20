@@ -1,3 +1,4 @@
+import random
 from scraping import Scraping
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -56,6 +57,15 @@ class Google(Scraping):
                 return datetime.strftime(today + timedelta(days=-(int(split_date[3])*365)), '%d/%m/%Y')
             else:
                 return datetime.strftime(today, '%d/%m/%Y')
+            
+        time.sleep(20)
+
+        try:
+            accept_btn = self.driver.find_element(By.XPATH, "//span[contains(text(), 'Tout accepter')]")
+            self.driver.execute_script("arguments[0].click();", accept_btn)
+            time.sleep(random.randint(5,15))
+        except:
+            pass
 
         time.sleep(5)
 

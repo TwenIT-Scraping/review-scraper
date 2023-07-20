@@ -76,7 +76,7 @@ class Opentable(Scraping):
                     'source': urlparse(self.url).netloc.split('.')[1],
                     'author': item.find_all('section')[0].find_all('p')[0].text.strip(),
                     'establishment': f'/api/establishments/{self.establishment}',
-                    'review_date': review_date
+                    'date_review': review_date
                 })
                 
             try:
@@ -99,10 +99,7 @@ class Opentable(Scraping):
                 print(e)
                 break
 
-        print(len(self.reviews_data))
-        
-
-        # self.data = reviews
+        self.data = self.reviews_data
 
 
 # trp = OpenTable()

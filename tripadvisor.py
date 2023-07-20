@@ -46,9 +46,14 @@ class Tripadvisor(Scraping):
                     except:
                         lang = 'en'
 
-                    date_raw = re.search(r"\(.*\)", item.find('div', {'class': 'cRVSd'}).text.strip()).group()
-                    month = date_raw.split()[0][1:]
-                    year = date_raw.split()[1][:-1]
+                    try:
+                        date_raw = re.search(r"\(.*\)", item.find('div', {'class': 'cRVSd'}).text.strip()).group()
+                        year = date_raw.split()[1][:-1]
+                        month = month_number(date_raw.split()[0][1:], 'fr', 'short')
+                    except:
+                        date_raw = item.find('div', {'class': 'cRVSd'}).text.strip()
+                        year = date_raw.split()[-1]
+                        month = month_number(date_raw.split()[-2], 'en', 'short')
 
                     review_data = {
                         'comment': comment,
@@ -57,12 +62,10 @@ class Tripadvisor(Scraping):
                         'source': urlparse(self.url).netloc.split('.')[1],
                         'author': item.find('a', class_='ui_header_link').text.strip() if item.find('a', class_='ui_header_link') else "",
                         'establishment': f'/api/establishments/{self.establishment}',
-                        'date_review': f"01/{month_number(month, 'fr', 'short')}/{year}"
+                        'date_review': f"01/{month}/{year}"
                     }
 
                     reviews.append(review_data)
-
-                print(len(reviews))
 
                 try:
                     next_btn = self.driver.find_element(By.CSS_SELECTOR, "a.nav.next")

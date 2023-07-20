@@ -94,7 +94,6 @@ class Expedia(Scraping):
             except Exception as e:
                 print(e)
 
-        print("total: ", len(reviews))
         self.data = reviews
 
 

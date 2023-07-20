@@ -42,14 +42,18 @@ class ListScraper:
             self.establishments.append(etab)
 
     def start(self):
+        refresh_connection()
+
         for item in self.establishments:
             time.sleep(random.randint(1,5))
-            refresh_connection()
-            print("Establishment: ", item.name)
+            
+            print("****** Establishment: ", item.name, " ******")
 
             for site in item.websites.keys():
                 if site in __class_name__.keys():
+                    print("===>\t", site)
                     instance = __class_name__[site](url=item.websites[site], establishment=item.id)
                     instance.execute()
+                    print("\n\n")
                     
 

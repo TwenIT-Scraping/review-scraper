@@ -25,8 +25,6 @@ class Booking(Scraping):
 
     def extract(self):
 
-        print("Id établissement: ", self.establishment)
-
         reviews = []
 
         # try:
@@ -46,7 +44,6 @@ class Booking(Scraping):
             soupe = BeautifulSoup(page, 'lxml')
 
             review_cards = soupe.find_all('li', {'itemprop': 'review'})
-            print(len(review_cards))
 
             for card in review_cards:
                 title = card.find('div', {'class': 'review_item_header_content'}).text.strip() if card.find('div', {'class': 'review_item_header_content'}) else ""

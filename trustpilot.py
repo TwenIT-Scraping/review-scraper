@@ -74,8 +74,6 @@ class Trustpilot(Scraping):
                 break
                 # print(e)
 
-        print("Final: ", len(reviews))
-
         self.data = reviews
 
 
