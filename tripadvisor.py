@@ -46,10 +46,25 @@ class Tripadvisor(Scraping):
                     except:
                         lang = 'en'
 
+                    year = datetime.today().year
+                    month = datetime.today().month
+                    day = datetime.today().day
+
                     try:
                         date_raw = re.search(r"\(.*\)", item.find('div', {'class': 'cRVSd'}).text.strip()).group()
-                        year = date_raw.split()[1][:-1]
-                        month = month_number(date_raw.split()[0][1:], 'fr', 'short')
+                        if date_raw == '(Hier)' or '(Yesterday)':
+                            last_day = datetime.today() + timedelta(days=-1)
+                            year = str(last_day.month)
+                            month = str(last_day.year)
+                            day = str(last_day.day)
+                        else:
+                            date_rawt = date_raw[1:-1].split()
+                            if date_rawt[0].isnumeric():
+                                day = date_rawt[0]
+                                month_number(date_rawt[1], 'fr', 'short')
+                            else:
+                                year = date_rawt[1]
+                                month = month_number(date_rawt[0], 'fr', 'short')
                     except:
                         date_raw = item.find('div', {'class': 'cRVSd'}).text.strip()
                         year = date_raw.split()[-1]
@@ -62,7 +77,7 @@ class Tripadvisor(Scraping):
                         'source': urlparse(self.url).netloc.split('.')[1],
                         'author': item.find('a', class_='ui_header_link').text.strip() if item.find('a', class_='ui_header_link') else "",
                         'establishment': f'/api/establishments/{self.establishment}',
-                        'date_review': f"01/{month}/{year}"
+                        'date_review': f"{day}/{month}/{year}"
                     }
 
                     reviews.append(review_data)
