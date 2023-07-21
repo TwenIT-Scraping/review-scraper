@@ -59,6 +59,8 @@ class Opentable(Scraping):
                 except:
                     lang = 'en'
 
+                review_date = '01/01/2022'
+
                 try:
                     date_raw = item.find('p', {'class': 'Xfrgl6cRPxn4vwFrFgk1'}).text.strip()
                     if date_raw[:8] == 'Dined on':
@@ -67,7 +69,7 @@ class Opentable(Scraping):
                     elif date_raw[-8:] == 'days ago':
                         review_date = datetime.strftime(datetime.now() + timedelta(days=-int(date_raw.split()[1])), '%d/%m/%Y')
                 except:
-                    review_date = '2022/01/01'
+                    review_date = '01/01/2022'
 
                 self.reviews_data.append({
                     'comment': comment,
