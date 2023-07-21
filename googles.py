@@ -58,12 +58,12 @@ class Google(Scraping):
             else:
                 return datetime.strftime(today, '%d/%m/%Y')
             
-        time.sleep(20)
+        time.sleep(3)
 
         try:
             accept_btn = self.driver.find_element(By.XPATH, "//span[contains(text(), 'Tout accepter')]")
             self.driver.execute_script("arguments[0].click();", accept_btn)
-            time.sleep(random.randint(5,15))
+            time.sleep(random.randint(2, 5))
         except:
             pass
 

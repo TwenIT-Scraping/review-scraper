@@ -17,6 +17,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 from langdetect import detect
 import random
+from tools import month_number
 
 
 class Expedia(Scraping):
@@ -37,7 +38,7 @@ class Expedia(Scraping):
         except Exception as e:
             print(e)
 
-        time.sleep(10)
+        time.sleep(5)
 
         while True:
             time.sleep(random.randint(1,10))
@@ -56,45 +57,53 @@ class Expedia(Scraping):
 
     def extract(self):
 
-        self.load_reviews()
-
-        reviews = []
+        enter_key = str(input("Entrer un caractère svp:"))
         
-        print("\n Extraction ... \n")
+        if enter_key:
 
-        page = self.driver.page_source
+            self.load_reviews()
 
-        soupe = BeautifulSoup(page, 'lxml')
-
-        review_cards = soupe.find_all('article', {'itemprop': 'review'})
-        for card in review_cards:
-            title = card.find('span', {'itemprop': 'name'}).text.strip() if card.find('span', {'itemprop': 'name'}) else ""
-            detail = card.find('span', {'itemprop': 'description'}).text.strip() if card.find('span', {'itemprop': 'description'}) else ""
-            comment = f"{title}{': ' if title and detail else ''}{detail}"
-
-            try:
-                lang = detect(comment)
-            except: 
-                lang = 'en'
+            reviews = []
             
-            date_raw = card.find('span', {'itemprop': 'datePublished'}).text.strip() if card.find('span', {'itemprop': 'datePublished'}) else ""
-            date_review = datetime.strftime(datetime.strptime(date_raw, '%b %d, %Y'), '%d/%m/%Y') if date_raw else "01/01/2022"
+            print("\n Extraction ... \n")
 
-            try:
-                reviews.append({
-                    'comment': comment,
-                    'rating': card.find('span', {'itemprop': 'ratingValue'}).text.strip().split('/')[0] + "/10" \
-                                if card.find('span', {'itemprop': 'ratingValue'}) else "0/10",
-                    'date_review': date_review,
-                    'language': lang,
-                    'source': urlparse(self.url).netloc.split('.')[1],
-                    'author': card.find('h4').text.strip(),
-                    'establishment': f'/api/establishments/{self.establishment}'
-                })
-            except Exception as e:
-                print(e)
+            page = self.driver.page_source
 
-        self.data = reviews
+            soupe = BeautifulSoup(page, 'lxml')
+
+            review_cards = soupe.find_all('article', {'itemprop': 'review'})
+            for card in review_cards:
+                title = card.find('span', {'itemprop': 'name'}).text.strip() if card.find('span', {'itemprop': 'name'}) else ""
+                detail = card.find('span', {'itemprop': 'description'}).text.strip() if card.find('span', {'itemprop': 'description'}) else ""
+                comment = f"{title}{': ' if title and detail else ''}{detail}"
+
+                try:
+                    lang = detect(comment)
+                except: 
+                    lang = 'en'
+                
+                date_raw = card.find('span', {'itemprop': 'datePublished'}).text.strip() if card.find('span', {'itemprop': 'datePublished'}) else ""
+                try:
+                    date_review = datetime.strftime(datetime.strptime(date_raw, '%b %d, %Y'), '%d/%m/%Y') if date_raw else "01/01/2022"
+                except:
+                    date_rawt = date_raw.split()
+                    date_review = "%s/%s/%s" % (date_rawt[0], month_number(date_rawt[1], 'fr', 'short'), date_rawt[2])
+
+                try:
+                    reviews.append({
+                        'comment': comment,
+                        'rating': card.find('span', {'itemprop': 'ratingValue'}).text.strip().split('/')[0] + "/10" \
+                                    if card.find('span', {'itemprop': 'ratingValue'}) else "0/10",
+                        'date_review': date_review,
+                        'language': lang,
+                        'source': urlparse(self.url).netloc.split('.')[1],
+                        'author': card.find('h4').text.strip(),
+                        'establishment': f'/api/establishments/{self.establishment}'
+                    })
+                except Exception as e:
+                    print(e)
+
+            self.data = reviews
 
 
 # trp = Expedia(url="https://www.expedia.com/Les-Deserts-Hotels-Vacanceole-Les-Balcons-DAix.h2481279.Hotel-Reviews")
