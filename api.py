@@ -140,15 +140,26 @@ class ERApi:
         page = 1
 
         while True:
+            print("getting establishement list...")
             getreq = ERApi('get', entity)
             getreq.add_params({'page': page})
             results = getreq.execute()
             all_data += results
+            print(results)
             page += 1
             if len(results) == 0:
                 break
         
         return all_data
+
+    @staticmethod
+    def get_all_no_page(entity):
+        print("getting ...")
+        getreq = ERApi('get', entity)
+        results = getreq.execute()
+        print(results)
+        
+        return results
 
     @staticmethod
     def delete_all(entity):

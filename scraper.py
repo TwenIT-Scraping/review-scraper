@@ -33,7 +33,7 @@ class ListScraper:
         self.ids = []
     
     def init(self, establishments=[]):
-        etabs = ERApi.get_all('establishments')
+        etabs = ERApi.get_all_no_page('establishment/name')
         if len(establishments):
             self.ids = map(lambda y: y['id'], list(filter(lambda x: x['name'] in establishments, etabs)))
         else:
